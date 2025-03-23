@@ -1,155 +1,187 @@
 
-import React, { useState } from 'react';
-import { Search } from 'lucide-react';
-import Layout from '@/components/layout/Layout';
+import React, { useState, useEffect } from 'react';
+import { Layout } from '@/components/layout/Layout';
 import MenuItem from '@/components/menu/MenuItem';
 import Cart from '@/components/menu/Cart';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useCart } from '@/context/CartContext';
+import { Button } from '@/components/ui/button';
+import { ShoppingBag } from 'lucide-react';
 
-// Sample menu data
-const menuItems = [
-  {
-    id: 'waffle-1',
-    name: 'Classic Belgian Waffle',
-    description: 'Traditional Belgian waffle topped with butter and maple syrup',
-    price: 180,
-    image: 'https://images.unsplash.com/photo-1562376552-0d160a2f35ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-    category: 'Waffles'
-  },
-  {
-    id: 'waffle-2',
-    name: 'Chocolate Lover Waffle',
-    description: 'Belgian waffle topped with chocolate sauce, chocolate chips, and whipped cream',
-    price: 230,
-    image: 'https://images.unsplash.com/photo-1488477181946-6428a0291777?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-    category: 'Waffles'
-  },
-  {
-    id: 'waffle-3',
-    name: 'Fruit Delight Waffle',
-    description: 'Belgian waffle topped with fresh seasonal fruits and a drizzle of honey',
-    price: 250,
-    image: 'https://images.unsplash.com/photo-1562376552-997671fe504e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-    category: 'Waffles'
-  },
-  {
-    id: 'waffle-4',
-    name: 'Banana Caramel Waffle',
-    description: 'Belgian waffle topped with caramelized bananas and salted caramel sauce',
-    price: 270,
-    image: 'https://images.unsplash.com/photo-1562376552-823060c84ddb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-    category: 'Waffles'
-  },
-  {
-    id: 'pancake-1',
-    name: 'Classic Buttermilk Pancakes',
-    description: 'Fluffy buttermilk pancakes served with butter and maple syrup',
-    price: 160,
-    image: 'https://images.unsplash.com/photo-1528207776546-365bb710ee93?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-    category: 'Pancakes'
-  },
-  {
-    id: 'pancake-2',
-    name: 'Blueberry Pancakes',
-    description: 'Buttermilk pancakes packed with fresh blueberries and topped with blueberry compote',
-    price: 210,
-    image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-    category: 'Pancakes'
-  },
-  {
-    id: 'pancake-3',
-    name: 'Chocolate Chip Pancakes',
-    description: 'Buttermilk pancakes loaded with chocolate chips and topped with chocolate sauce',
-    price: 220,
-    image: 'https://images.unsplash.com/photo-1541288097308-7b8e3f58c4c6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-    category: 'Pancakes'
-  },
-  {
-    id: 'beverage-1',
-    name: 'Fresh Orange Juice',
-    description: 'Freshly squeezed orange juice',
-    price: 120,
-    image: 'https://images.unsplash.com/photo-1600271886742-f049cd451bba?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-    category: 'Beverages'
-  },
-  {
-    id: 'beverage-2',
-    name: 'Classic Coffee',
-    description: 'Freshly brewed premium coffee',
-    price: 150,
-    image: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=80',
-    category: 'Beverages'
-  }
+// Menu categories
+const categories = [
+  'All',
+  'Waffles',
+  'Pancakes',
+  'Combos',
+  'Beverages',
+  'Extras'
 ];
 
-const Order = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [activeCategory, setActiveCategory] = useState<'all' | 'waffles' | 'pancakes' | 'beverages'>('all');
+// Menu data
+const menuItems = [
+  {
+    id: 'w1',
+    name: 'Classic Waffle',
+    description: 'Our signature crispy waffle served with maple syrup and butter',
+    price: 149,
+    image: '/placeholder.svg',
+    category: 'Waffles',
+  },
+  {
+    id: 'w2',
+    name: 'Chocolate Waffle',
+    description: 'Delicious waffle topped with chocolate sauce and chocolate chips',
+    price: 179,
+    image: '/placeholder.svg',
+    category: 'Waffles',
+  },
+  {
+    id: 'w3',
+    name: 'Fruit Waffle',
+    description: 'Waffle served with fresh seasonal fruits and honey',
+    price: 199,
+    image: '/placeholder.svg',
+    category: 'Waffles',
+  },
+  {
+    id: 'p1',
+    name: 'Classic Pancakes',
+    description: 'Fluffy pancakes with maple syrup and whipped butter',
+    price: 129,
+    image: '/placeholder.svg',
+    category: 'Pancakes',
+  },
+  {
+    id: 'p2',
+    name: 'Blueberry Pancakes',
+    description: 'Soft pancakes loaded with fresh blueberries and syrup',
+    price: 159,
+    image: '/placeholder.svg',
+    category: 'Pancakes',
+  },
+  {
+    id: 'p3',
+    name: 'Banana Pancakes',
+    description: 'Pancakes with sliced bananas and caramel sauce',
+    price: 169,
+    image: '/placeholder.svg',
+    category: 'Pancakes',
+  },
+  {
+    id: 'c1',
+    name: 'Waffle & Pancake Combo',
+    description: 'Best of both worlds - one waffle and two pancakes',
+    price: 249,
+    image: '/placeholder.svg',
+    category: 'Combos',
+  },
+  {
+    id: 'c2',
+    name: 'Family Breakfast',
+    description: 'Two waffles, four pancakes, fruits and two beverages',
+    price: 549,
+    image: '/placeholder.svg',
+    category: 'Combos',
+  },
+  {
+    id: 'b1',
+    name: 'Fresh Orange Juice',
+    description: 'Freshly squeezed orange juice',
+    price: 99,
+    image: '/placeholder.svg',
+    category: 'Beverages',
+  },
+  {
+    id: 'b2',
+    name: 'Coffee',
+    description: 'Freshly brewed coffee',
+    price: 79,
+    image: '/placeholder.svg',
+    category: 'Beverages',
+  },
+  {
+    id: 'e1',
+    name: 'Whipped Cream',
+    description: 'Extra serving of whipped cream',
+    price: 39,
+    image: '/placeholder.svg',
+    category: 'Extras',
+  },
+  {
+    id: 'e2',
+    name: 'Chocolate Sauce',
+    description: 'Extra chocolate sauce for your waffle or pancake',
+    price: 29,
+    image: '/placeholder.svg',
+    category: 'Extras',
+  },
+];
+
+const Order: React.FC = () => {
+  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [cartOpen, setCartOpen] = useState(false);
+  const { getTotalItems } = useCart();
   
-  const filteredItems = menuItems.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           item.description.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesCategory = activeCategory === 'all' || 
-                            item.category.toLowerCase() === activeCategory;
-    
-    return matchesSearch && matchesCategory;
-  });
+  // Filter menu items based on selected category
+  const filteredItems = selectedCategory === 'All' 
+    ? menuItems 
+    : menuItems.filter(item => item.category === selectedCategory);
 
   return (
     <Layout>
-      <div className="container py-6">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">Our Menu</h1>
-        
-        {/* Search */}
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input
-            type="text"
-            placeholder="Search menu..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        
-        {/* Category Tabs */}
-        <Tabs 
-          defaultValue="all" 
-          value={activeCategory}
-          onValueChange={(value) => setActiveCategory(value as any)}
-          className="mb-6"
-        >
-          <TabsList className="grid grid-cols-4 w-full">
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="waffles">Waffles</TabsTrigger>
-            <TabsTrigger value="pancakes">Pancakes</TabsTrigger>
-            <TabsTrigger value="beverages">Drinks</TabsTrigger>
-          </TabsList>
-        </Tabs>
-        
-        {/* Menu Items */}
-        {filteredItems.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500">No items found matching your search.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-8">
-            {filteredItems.map((item, index) => (
-              <MenuItem 
-                key={item.id} 
-                {...item} 
-                className="animate-fade-in"
-                style={{ animationDelay: `${index * 100}ms` }}
-              />
+      <div className="pb-20 px-4 max-w-lg mx-auto">
+        {/* Categories */}
+        <div className="mb-4 overflow-x-auto hide-scrollbar">
+          <div className="flex space-x-2 pb-2">
+            {categories.map(category => (
+              <Button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                variant={selectedCategory === category ? "default" : "outline"}
+                className={`whitespace-nowrap ${
+                  selectedCategory === category 
+                    ? "bg-amber-500 hover:bg-amber-600" 
+                    : "text-amber-600 border-amber-300 hover:bg-amber-50"
+                }`}
+              >
+                {category}
+              </Button>
             ))}
           </div>
-        )}
+        </div>
+        
+        {/* Menu Items */}
+        <div className="grid grid-cols-1 gap-4 mb-20">
+          {filteredItems.map((item, index) => (
+            <MenuItem
+              key={item.id}
+              id={item.id}
+              name={item.name}
+              description={item.description}
+              price={item.price}
+              image={item.image}
+              category={item.category}
+              className={`animate-fade-in`}
+            />
+          ))}
+        </div>
+        
+        {/* Cart Button */}
+        <Button
+          onClick={() => setCartOpen(true)}
+          className="fixed bottom-20 right-4 bg-amber-500 hover:bg-amber-600 text-white rounded-full shadow-lg p-3 z-10"
+        >
+          <ShoppingBag className="h-6 w-6" />
+          {getTotalItems() > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+              {getTotalItems()}
+            </span>
+          )}
+        </Button>
+        
+        {/* Cart Drawer */}
+        <Cart open={cartOpen} onClose={() => setCartOpen(false)} />
       </div>
-      
-      {/* Floating Cart */}
-      <Cart />
     </Layout>
   );
 };

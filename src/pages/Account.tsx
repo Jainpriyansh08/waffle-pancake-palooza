@@ -1,191 +1,105 @@
 
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { 
-  LogOut, 
-  ChevronRight, 
-  Medal, 
-  Clock, 
-  MapPin, 
-  Info, 
-  HelpCircle, 
-  Share2, 
-  Facebook, 
-  Instagram 
-} from 'lucide-react';
+import { Layout } from '@/components/layout/Layout';
 import { useAuth } from '@/context/AuthContext';
 import { useUser } from '@/context/UserContext';
-import Layout from '@/components/layout/Layout';
-import Badge from '@/components/ui/Badge';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { toast } from 'sonner';
+import { Card } from '@/components/ui/card';
+import { 
+  User, History, Award, MapPin, Info, 
+  HelpCircle, Share2, Facebook, Instagram, Twitter,
+  LogOut
+} from 'lucide-react';
+import Badge from '@/components/ui/Badge';
 
-const AccountItem = ({ 
-  icon: Icon, 
-  label, 
-  onClick 
-}: { 
-  icon: React.ElementType; 
-  label: string; 
-  onClick?: () => void;
-}) => (
-  <button
-    className="flex items-center justify-between w-full px-4 py-3 hover:bg-gray-50 transition-colors"
-    onClick={onClick}
-  >
-    <div className="flex items-center">
-      <Icon className="h-5 w-5 text-gray-500 mr-3" />
-      <span className="text-gray-700">{label}</span>
-    </div>
-    <ChevronRight className="h-4 w-4 text-gray-400" />
-  </button>
-);
-
-const Account = () => {
-  const { user, logout } = useAuth();
+const Account: React.FC = () => {
+  const { logout } = useAuth();
   const { profile, getBadge } = useUser();
-  const navigate = useNavigate();
   
-  // Redirect if not authenticated
-  React.useEffect(() => {
-    if (!user) {
-      navigate('/');
-    }
-  }, [user, navigate]);
-
-  if (!user || !profile) return null;
-
-  const badgeType = getBadge();
-  
-  const handleShareApp = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: 'Drizzle n Crunch',
-        text: 'Check out this amazing waffle and pancake shop app!',
-        url: window.location.origin
-      }).catch(error => {
-        toast.error('Error sharing app');
-      });
-    } else {
-      toast.success('App link copied to clipboard!', {
-        description: 'Share it with your friends!'
-      });
-    }
+  const handleLogout = () => {
+    logout();
+    window.location.href = '/';
   };
+  
+  const sections = [
+    { id: 'history', icon: <History className="h-5 w-5" />, title: 'Order History' },
+    { id: 'rewards', icon: <Award className="h-5 w-5" />, title: 'My Rewards' },
+    { id: 'stores', icon: <MapPin className="h-5 w-5" />, title: 'Our Stores' },
+    { id: 'program', icon: <Info className="h-5 w-5" />, title: 'Rewards Program Info' },
+    { id: 'about', icon: <Info className="h-5 w-5" />, title: 'About Us' },
+    { id: 'help', icon: <HelpCircle className="h-5 w-5" />, title: 'Help & FAQ' },
+    { id: 'share', icon: <Share2 className="h-5 w-5" />, title: 'Share This App' },
+  ];
 
   return (
     <Layout>
-      <div className="container py-6 pb-24">
+      <div className="pb-20 px-4 max-w-lg mx-auto">
         {/* Profile Header */}
-        <div className="bg-white rounded-xl p-4 shadow-sm mb-6 animate-fade-in">
-          <div className="flex items-center">
-            <div className="w-16 h-16 bg-dc-amber rounded-full flex items-center justify-center text-white text-xl font-bold">
-              {profile.name.charAt(0)}
-            </div>
-            
-            <div className="ml-4">
-              <h2 className="text-lg font-semibold text-gray-800">{profile.name}</h2>
-              <p className="text-sm text-gray-500">{user.phoneNumber}</p>
-              {badgeType !== 'none' && (
-                <div className="mt-2">
-                  <Badge type={badgeType} showLabel={true} />
-                </div>
-              )}
+        <Card className="mb-6 overflow-hidden">
+          <div className="bg-gradient-to-r from-amber-500 to-orange-400 p-4">
+            <div className="flex items-center">
+              <div className="bg-white rounded-full p-3 mr-4">
+                <User className="h-8 w-8 text-amber-500" />
+              </div>
+              <div className="text-white">
+                <h2 className="text-xl font-bold">{profile?.name || 'User'}</h2>
+                <p className="text-sm opacity-90">{profile?.email || ''}</p>
+              </div>
             </div>
           </div>
-        </div>
-        
-        {/* Account Options */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden animate-fade-in">
-          <div className="divide-y divide-gray-100">
-            <AccountItem 
-              icon={Clock} 
-              label="Order History" 
-              onClick={() => toast.info('Order History coming soon!')}
-            />
+          
+          <div className="p-4 flex justify-between items-center">
+            <div>
+              <p className="text-sm text-gray-500">Your DC Coins</p>
+              <p className="text-2xl font-bold text-amber-600">{profile?.dcCoins || 0}</p>
+            </div>
             
-            <AccountItem 
-              icon={Medal} 
-              label="My Rewards" 
-              onClick={() => toast.info('My Rewards coming soon!')}
-            />
-            
-            <AccountItem 
-              icon={MapPin} 
-              label="Our Stores" 
-              onClick={() => toast.info('Store Locator coming soon!')}
-            />
+            {getBadge() !== 'none' && (
+              <Badge type={getBadge()} />
+            )}
           </div>
+        </Card>
+        
+        {/* Account Sections */}
+        <div className="space-y-3 mb-8">
+          {sections.map(section => (
+            <Card 
+              key={section.id}
+              className="flex items-center p-4 hover:bg-gray-50 cursor-pointer transition-colors"
+            >
+              <div className="text-amber-500 mr-3">
+                {section.icon}
+              </div>
+              <span className="text-gray-800">{section.title}</span>
+            </Card>
+          ))}
         </div>
         
-        <div className="mt-6 bg-white rounded-xl shadow-sm overflow-hidden animate-fade-in">
-          <div className="divide-y divide-gray-100">
-            <AccountItem 
-              icon={Info} 
-              label="Rewards Program Info" 
-              onClick={() => toast.info('Rewards Program Info coming soon!')}
-            />
-            
-            <AccountItem 
-              icon={Info} 
-              label="About Us" 
-              onClick={() => toast.info('About Us coming soon!')}
-            />
-            
-            <AccountItem 
-              icon={HelpCircle} 
-              label="Help & FAQ" 
-              onClick={() => toast.info('Help & FAQ coming soon!')}
-            />
-            
-            <AccountItem 
-              icon={Share2} 
-              label="Share This App" 
-              onClick={handleShareApp}
-            />
+        {/* Social Media */}
+        <div className="mb-8">
+          <h3 className="text-sm font-medium text-gray-500 mb-3">Follow Us</h3>
+          <div className="flex space-x-4">
+            <a href="#" className="bg-blue-500 text-white p-2 rounded-full">
+              <Facebook className="h-5 w-5" />
+            </a>
+            <a href="#" className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-2 rounded-full">
+              <Instagram className="h-5 w-5" />
+            </a>
+            <a href="#" className="bg-blue-400 text-white p-2 rounded-full">
+              <Twitter className="h-5 w-5" />
+            </a>
           </div>
         </div>
         
         {/* Logout Button */}
-        <div className="mt-6 animate-fade-in">
-          <Button
-            variant="outline"
-            className="w-full flex items-center justify-center text-red-500 hover:text-red-600 border-red-200 hover:border-red-300"
-            onClick={() => {
-              logout();
-              navigate('/');
-            }}
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            <span>Logout</span>
-          </Button>
-        </div>
-        
-        {/* Social Links */}
-        <div className="mt-12 text-center">
-          <p className="text-sm text-gray-500 mb-3">Follow us on</p>
-          <div className="flex justify-center space-x-4">
-            <Link 
-              to="#" 
-              className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white hover:bg-blue-700 transition-colors"
-              aria-label="Facebook"
-            >
-              <Facebook className="h-5 w-5" />
-            </Link>
-            <Link 
-              to="#" 
-              className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-600 to-pink-500 flex items-center justify-center text-white hover:from-purple-700 hover:to-pink-600 transition-colors"
-              aria-label="Instagram"
-            >
-              <Instagram className="h-5 w-5" />
-            </Link>
-          </div>
-          
-          <p className="text-xs text-gray-400 mt-6">
-            Drizzle n Crunch &copy; {new Date().getFullYear()}
-          </p>
-        </div>
+        <Button
+          onClick={handleLogout}
+          variant="outline"
+          className="w-full border-red-300 text-red-500 hover:bg-red-50 hover:text-red-600"
+        >
+          <LogOut className="h-4 w-4 mr-2" />
+          Logout
+        </Button>
       </div>
     </Layout>
   );

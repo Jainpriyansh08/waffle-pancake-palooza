@@ -13,6 +13,7 @@ interface MenuItemProps {
   image: string;
   category: string;
   className?: string;
+  style?: React.CSSProperties;
 }
 
 const MenuItem: React.FC<MenuItemProps> = ({
@@ -22,7 +23,8 @@ const MenuItem: React.FC<MenuItemProps> = ({
   price,
   image,
   category,
-  className
+  className,
+  style
 }) => {
   const { addItem } = useCart();
   
@@ -38,6 +40,7 @@ const MenuItem: React.FC<MenuItemProps> = ({
         "animate-fade-in",
         className
       )}
+      style={style}
     >
       <div className="relative h-40 overflow-hidden">
         <img
