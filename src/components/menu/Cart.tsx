@@ -10,14 +10,25 @@ import { toast } from 'sonner';
 
 interface CartProps {
   className?: string;
+  open?: boolean;
+  onClose?: () => void;
 }
 
-const Cart: React.FC<CartProps> = ({ className }) => {
+const Cart: React.FC<CartProps> = ({ className, open, onClose }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const { items, updateQuantity, removeItem, getTotal, clearCart } = useCart();
   const { addDcCoins, getCoinsPerOrder } = useUser();
   
-  const toggleExpand = () => setIsExpanded(!isExpanded);
+  // Use open prop if provided, otherwise use local state
+  const isOpen = open !== undefined ? open : isExpanded;
+  
+  const toggleExpand = () => {
+    if (onClose && isOpen) {
+      onClose();
+    } else {
+      setIsExpanded(!isExpanded);
+    }
+  };
   
   const handlePlaceOrder = () => {
     if (items.length === 0) {
@@ -33,10 +44,15 @@ const Cart: React.FC<CartProps> = ({ className }) => {
       description: "Your order is being prepared.",
     });
     
-    setIsExpanded(false);
+    // Close the cart after placing an order
+    if (onClose) {
+      onClose();
+    } else {
+      setIsExpanded(false);
+    }
   };
 
-  if (items.length === 0 && !isExpanded) {
+  if (items.length === 0 && !isOpen) {
     return (
       <Button
         onClick={toggleExpand}
@@ -56,7 +72,7 @@ const Cart: React.FC<CartProps> = ({ className }) => {
       className={cn(
         "fixed bottom-24 right-4 z-50 w-[calc(100%-2rem)] sm:w-96 max-h-[70vh] rounded-lg shadow-xl",
         "bg-white border border-gray-200 transition-all duration-300",
-        isExpanded ? "scale-100 opacity-100" : "scale-95 opacity-0 pointer-events-none",
+        isOpen ? "scale-100 opacity-100" : "scale-95 opacity-0 pointer-events-none",
         className
       )}
     >

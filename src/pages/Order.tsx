@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Layout } from '@/components/layout/Layout';
+import Layout from '@/components/layout/Layout';
 import MenuItem from '@/components/menu/MenuItem';
 import Cart from '@/components/menu/Cart';
 import { useCart } from '@/context/CartContext';

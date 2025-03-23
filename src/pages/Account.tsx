@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Layout } from '@/components/layout/Layout';
+import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/context/AuthContext';
 import { useUser } from '@/context/UserContext';
 import { Button } from '@/components/ui/button';
