@@ -4,7 +4,7 @@ import Layout from '@/components/layout/Layout';
 import { useUser } from '@/context/UserContext';
 import { Card } from '@/components/ui/card';
 import { MapPin, Award } from 'lucide-react';
-import Badge from '@/components/ui/Badge';
+import LoyaltyBadge from '@/components/ui/LoyaltyBadge';
 
 const Home: React.FC = () => {
   const { profile, getBadge } = useUser();
@@ -69,7 +69,7 @@ const Home: React.FC = () => {
             </div>
             
             {getBadge() !== 'none' && (
-              <Badge type={getBadge()} className="shadow-md" />
+              <LoyaltyBadge type={getBadge()} className="shadow-md" />
             )}
           </div>
         </div>

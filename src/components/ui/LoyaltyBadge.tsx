@@ -8,7 +8,7 @@ interface BadgeProps {
   className?: string;
 }
 
-const Badge: React.FC<BadgeProps> = ({ type, showLabel = true, className }) => {
+const LoyaltyBadge: React.FC<BadgeProps> = ({ type, showLabel = true, className }) => {
   if (type === 'none') return null;
   
   const badgeClasses = {
@@ -40,4 +40,4 @@ const Badge: React.FC<BadgeProps> = ({ type, showLabel = true, className }) => {
   );
 };
 
-export default Badge;
+export default LoyaltyBadge;

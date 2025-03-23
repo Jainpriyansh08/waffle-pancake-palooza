@@ -10,7 +10,7 @@ import {
   HelpCircle, Share2, Facebook, Instagram, Twitter,
   LogOut
 } from 'lucide-react';
-import Badge from '@/components/ui/Badge';
+import LoyaltyBadge from '@/components/ui/LoyaltyBadge';
 
 const Account: React.FC = () => {
   const { logout } = useAuth();
@@ -55,7 +55,7 @@ const Account: React.FC = () => {
             </div>
             
             {getBadge() !== 'none' && (
-              <Badge type={getBadge()} />
+              <LoyaltyBadge type={getBadge()} />
             )}
           </div>
         </Card>
